@@ -5,9 +5,9 @@ from typing import Optional
 
 class Database(ABC):
     __database: str = './contacts/.contacts.s3db'
-    __ADD: str = 'INSERT INTO contacts_list VALUES(NULL,?, ?,?)'
-    __DELETE: str = 'DELETE FROM contacts_list WHERE name = ?'
-    __UPDATE: str = 'UPDATE contacts_list SET number=? WHERE number =? AND name =?'
+    __ADD: str = 'INSERT INTO contacts VALUES(?, ?,?)'
+    __DELETE: str = 'DELETE FROM contacts WHERE name = ?'
+    __UPDATE: str = 'UPDATE contacts SET number=? WHERE number =? AND name =?'
 
     @classmethod
     def execute(cls, query: str, parameters: tuple) -> bool:
@@ -24,7 +24,7 @@ class Database(ABC):
     def list(cls) -> Optional[list]:
         with connect(cls.__database) as database:
             cursor: Cursor = database.cursor()
-            query: str = 'SELECT * FROM contacts_list ORDER BY name desc'
+            query: str = 'SELECT * FROM contacts ORDER BY name DESC'
             try:
                 cursor.execute(query)
                 query: list = cursor.fetchall()
