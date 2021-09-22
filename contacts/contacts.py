@@ -62,6 +62,12 @@ class Contacts:
         self.t_name.place(x=76, y=10, anchor=W, width=299)
         self.t_email.place(x=76, y=35, anchor=W, width=299)
         self.t_number.place(x=76, y=60, anchor=W, width=299)
+        self.t_name.bind('<Key-Return>', lambda _: self.add())
+        self.t_email.bind('<Key-Return>', lambda _: self.add())
+        self.t_number.bind('<Key-Return>', lambda _: self.add())
+        self.t_name.bind('<KP_Enter>', lambda _: self.add())
+        self.t_email.bind('<KP_Enter>', lambda _: self.add())
+        self.t_number.bind('<KP_Enter>', lambda _: self.add())
         TButton(top_frame, text='Adicionar contato', command=self.add)\
             .place(x=200, y=100, anchor=CENTER, width=200)
 
