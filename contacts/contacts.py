@@ -19,6 +19,7 @@ class Contacts:
         self.gui()
 
     def gui(self) -> None:
+        """self.__init__() calls self.gui()"""
         self.root.configure(bg='black')
         style: Style = Style()
         style.configure('.', font='TimesNewRoman 12', background='black', foreground='violet')
@@ -49,6 +50,7 @@ class Contacts:
         self.view()
 
     def top_frame(self) -> None:
+        """self.gui() calls self.top_frame()"""
         top_frame: TLabelFrame = TLabelFrame(self.root, text='Criar novo contato', labelanchor='n')
         top_frame.place(x=20, y=10, width=400, height=150)
         TLabel(top_frame, text='Nome:').place(x=75, y=10, anchor=E)
@@ -63,34 +65,9 @@ class Contacts:
         TButton(top_frame, text='Adicionar contato', command=self.add)\
             .place(x=200, y=100, anchor=CENTER, width=200)
 
-    @staticmethod
-    def contacts_icon() -> None:
-        icon: PhotoImage = PhotoImage(file='contacts/.contacts.gif')
-        label: TLabel = TLabel(image=icon, border=0)
-        label.image = icon
-        label.place(x=455, y=35)
-
-    def bottom_frame(self) -> None:
-        self.t_view = Treeview(columns=(0, 0))
-        self.t_view.place(x=20, y=170, width=550, height=250)
-        self.t_view.heading('#0', text='Nome', anchor=W)
-        self.t_view.heading('#1', text='Email', anchor=W)
-        self.t_view.heading('#2', text='Número', anchor=W)
-        Scrollbar(orient='vertical', command=self.t_view.yview).place(x=570, y=170, height=250, width=15)
-        Scrollbar(orient='horizontal', command=self.t_view.xview).place(x=20, y=420, height=15, width=550)
-        Label(self.root, background='violet').place(x=570, y=420, height=15, width=15)
-        TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
-        TButton(self.root, text='Deletar contato').place(x=420, y=465, anchor=CENTER, width=200)
-
-    def view(self) -> None:
-        for _ in self.t_view.get_children():
-            self.t_view.delete(_)
-        contacts: list = Database.list()
-        for contact in contacts:
-            self.t_view.insert('', 0, text=contact[0], values=(contact[1], contact[2]))
-
     def add(self) -> None:
-        if self.check():
+        """self.top_frame() calls self.add()"""
+        if self.check_add():
             add = (self.t_name.get(), self.t_email.get(), int(self.t_number.get()))
             Database.execute(Database.add(), add)
             self.t_name.delete(0, END)
@@ -98,7 +75,8 @@ class Contacts:
             self.t_number.delete(0, END)
             self.view()
 
-    def check(self) -> bool:
+    def check_add(self) -> bool:
+        """self.add() calls self.check_add()"""
         t_name = self.t_name.get()
         t_email = self.t_email.get()
         t_number = self.t_number.get()
@@ -128,3 +106,31 @@ class Contacts:
             )
         else:
             return True
+
+    @staticmethod
+    def contacts_icon() -> None:
+        """self.gui() calls self.contacts_icon"""
+        icon: PhotoImage = PhotoImage(file='contacts/.contacts.gif')
+        label: TLabel = TLabel(image=icon, border=0)
+        label.image = icon
+        label.place(x=455, y=35)
+
+    def bottom_frame(self) -> None:
+        """self.gui() calls self.bottom_frame()"""
+        self.t_view = Treeview(columns=(0, 0))
+        self.t_view.place(x=20, y=170, width=550, height=250)
+        self.t_view.heading('#0', text='Nome', anchor=W)
+        self.t_view.heading('#1', text='Email', anchor=W)
+        self.t_view.heading('#2', text='Número', anchor=W)
+        Scrollbar(orient='vertical', command=self.t_view.yview).place(x=570, y=170, height=250, width=15)
+        Scrollbar(orient='horizontal', command=self.t_view.xview).place(x=20, y=420, height=15, width=550)
+        Label(self.root, background='violet').place(x=570, y=420, height=15, width=15)
+        TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
+        TButton(self.root, text='Deletar contato').place(x=420, y=465, anchor=CENTER, width=200)
+
+    def view(self) -> None:
+        """self.gui() and self.add call self.view()"""
+        for _ in self.t_view.get_children():
+            self.t_view.delete(_)
+        for _ in Database.list():
+            self.t_view.insert('', 0, text=_[0], values=(_[1], _[2]))
