@@ -79,6 +79,10 @@ class Contacts:
             self.t_name.delete(0, END)
             self.t_email.delete(0, END)
             self.t_number.delete(0, END)
+            Messages.show_info(
+                'Contato adicionado!',
+                f'{add[0]} foi adicionado(a) aos contatos!'
+            )
             self.view()
 
     def check_add(self) -> bool:
