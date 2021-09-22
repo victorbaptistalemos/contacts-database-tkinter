@@ -1,6 +1,6 @@
 from contacts.database import Database
 from contacts.messages import Messages
-from tkinter import CENTER, E, Label, PhotoImage, Tk, W
+from tkinter import CENTER, E, END, Label, PhotoImage, Tk, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
 from tkinter.ttk import Label as TLabel
@@ -16,6 +16,10 @@ class Contacts:
         self.t_number = None
         self.t_view = None
         self.root: Tk = root
+        self.gui()
+
+    def gui(self) -> None:
+        self.root.configure(bg='black')
         style: Style = Style()
         style.configure('.', font='TimesNewRoman 12', background='black', foreground='violet')
         style.configure('TButton', font='TimesNewRoman 14 bold')
@@ -39,10 +43,6 @@ class Contacts:
             background=[('active', 'violet'), ('!active', 'violet')],
             foreground=[('active', 'black'), ('!active', 'black')]
         )
-        self.gui()
-
-    def gui(self) -> None:
-        self.root.configure(bg='black')
         self.top_frame()
         self.contacts_icon()
         self.bottom_frame()
@@ -60,7 +60,8 @@ class Contacts:
         self.t_name.place(x=76, y=10, anchor=W, width=299)
         self.t_email.place(x=76, y=35, anchor=W, width=299)
         self.t_number.place(x=76, y=60, anchor=W, width=299)
-        TButton(top_frame, text='Adicionar contato').place(x=200, y=100, anchor=CENTER, width=200)
+        TButton(top_frame, text='Adicionar contato', command=self.add)\
+            .place(x=200, y=100, anchor=CENTER, width=200)
 
     @staticmethod
     def contacts_icon() -> None:
@@ -69,7 +70,7 @@ class Contacts:
         label.image = icon
         label.place(x=455, y=35)
 
-    def bottom_frame(self):
+    def bottom_frame(self) -> None:
         self.t_view = Treeview(columns=(0, 0))
         self.t_view.place(x=20, y=170, width=550, height=250)
         self.t_view.heading('#0', text='Nome', anchor=W)
@@ -81,14 +82,23 @@ class Contacts:
         TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
         TButton(self.root, text='Deletar contato').place(x=420, y=465, anchor=CENTER, width=200)
 
-    def view(self):
+    def view(self) -> None:
         for _ in self.t_view.get_children():
             self.t_view.delete(_)
         contacts: list = Database.list()
         for contact in contacts:
             self.t_view.insert('', 0, text=contact[0], values=(contact[1], contact[2]))
 
-    def check(self):
+    def add(self) -> None:
+        if self.check():
+            add = (self.t_name.get(), self.t_email.get(), int(self.t_number.get()))
+            Database.execute(Database.add(), add)
+            self.t_name.delete(0, END)
+            self.t_email.delete(0, END)
+            self.t_number.delete(0, END)
+            self.view()
+
+    def check(self) -> bool:
         t_name = self.t_name.get()
         t_email = self.t_email.get()
         t_number = self.t_number.get()
