@@ -1,5 +1,6 @@
 from contacts.database import Database
 from contacts.messages import Messages
+from contacts.update import Update
 from tkinter import CENTER, E, END, Label, PhotoImage, Tk, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
@@ -135,9 +136,25 @@ class Contacts:
         Scrollbar(orient='vertical', command=self.t_view.yview).place(x=570, y=170, height=250, width=15)
         Scrollbar(orient='horizontal', command=self.t_view.xview).place(x=20, y=420, height=15, width=550)
         Label(self.root, background='violet').place(x=570, y=420, height=15, width=15)
-        TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
+        TButton(self.root, text='Modificar contato', command=self.update)\
+            .place(x=175, y=465, anchor=CENTER, width=200)
         TButton(self.root, text='Deletar contato', command=self.delete)\
             .place(x=420, y=465, anchor=CENTER, width=200)
+
+    def update(self) -> None:
+        """self.bottom_frame() calls self.update()"""
+        selection: dict = self.t_view.selection()
+        name = self.t_view.item(selection)['text']
+        if name == '':
+            Messages.show_error(
+                'Nenhum contato selecionado!',
+                'Selecione um contato antes de modificá-lo.'
+            )
+        else:
+            email = self.t_view.item(selection)['values'][0]
+            number = self.t_view.item(selection)['values'][1]
+            Update((name, email, number))
+            self.view()
 
     def delete(self) -> None:
         """self.bottom_frame() calls self.delete()"""
@@ -145,7 +162,7 @@ class Contacts:
         if name == '':
             Messages.show_error(
                 'Nenhum contato selecionado!',
-                'Selecione um contato antes de continuar.'
+                'Selecione um contato antes de deletá-lo.'
             )
         elif Messages.try_action('Confirma ação?', f'Deseja deletar {name} dos contatos?'):
             if Database.execute(Database.delete(), (name,)):
@@ -161,7 +178,7 @@ class Contacts:
                 )
 
     def view(self) -> None:
-        """self.gui(), self.add() and self.delete() call self.view()"""
+        """self.gui(), self.add(), self.update() and self.delete() call self.view()"""
         for _ in self.t_view.get_children():
             self.t_view.delete(_)
         for _ in Database.list():
