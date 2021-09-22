@@ -1,7 +1,8 @@
-from tkinter import CENTER, E, Label, LabelFrame, PhotoImage, Tk, W
+from tkinter import CENTER, E, PhotoImage, Tk, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
 from tkinter.ttk import Label as TLabel
+from tkinter.ttk import LabelFrame as TLabelFrame
 from tkinter.ttk import Style, Treeview
 
 
@@ -12,11 +13,9 @@ class Contacts:
         self.root: Tk = root
         style: Style = Style()
         style.configure('.', font='TimesNewRoman 12', background='black', foreground='violet')
+        style.configure('TLabelframe.Label', font='TimesNewRoman 14 bold')
         style.configure('TLabel', font='TimesNewRoman 14')
-        style.map(
-            'TEntry',
-            foreground=[('!focus', 'black'), ('selected', 'purple')],
-            background=[('!focus', 'violet'), ('selected', 'violet')],)
+        style.configure('TEntry', fieldbackground='violet', foreground='black')
         style.configure('TButton', font='TimesNewRoman 14 bold')
         style.map(
             'TButton',
@@ -43,15 +42,7 @@ class Contacts:
         self.bottom_frame()
 
     def top_frame(self) -> None:
-        top_frame = LabelFrame(
-            self.root,
-            text='Criar novo contato',
-            background='black',
-            foreground='violet',
-            font='TimesNewRoman 14 bold',
-            labelanchor='n',
-            bd=0
-        )
+        top_frame = TLabelFrame(self.root, text='Criar novo contato', labelanchor='n')
         top_frame.place(x=25, y=10, width=400, height=150)
         TLabel(top_frame, text='Nome:').place(x=75, y=10, anchor=E)
         TLabel(top_frame, text='Email:').place(x=75, y=35, anchor=E)
@@ -64,7 +55,7 @@ class Contacts:
     @staticmethod
     def contacts_icon() -> None:
         icon: PhotoImage = PhotoImage(file='contacts/.contacts.gif')
-        label: Label = Label(image=icon, border=0)
+        label: TLabel = TLabel(image=icon, border=0)
         label.image = icon
         label.place(x=450, y=35)
 
