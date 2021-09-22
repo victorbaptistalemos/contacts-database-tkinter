@@ -1,3 +1,4 @@
+from contacts.database import Database
 from tkinter import CENTER, E, Label, PhotoImage, Tk, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
@@ -8,6 +9,7 @@ from tkinter.ttk import Scrollbar, Style, Treeview
 
 class Contacts:
     def __init__(self, root: Tk) -> None:
+        self.t_view = None
         self.root: Tk = root
         style: Style = Style()
         style.configure('.', font='TimesNewRoman 12', background='black', foreground='violet')
@@ -39,6 +41,7 @@ class Contacts:
         self.top_frame()
         self.contacts_icon()
         self.bottom_frame()
+        self.view()
 
     def top_frame(self) -> None:
         top_frame = TLabelFrame(self.root, text='Criar novo contato', labelanchor='n')
@@ -59,13 +62,20 @@ class Contacts:
         label.place(x=455, y=35)
 
     def bottom_frame(self):
-        bottom_frame = Treeview(columns=(0, 0))
-        bottom_frame.place(x=20, y=170, width=550, height=250)
-        bottom_frame.heading('#0', text='Nome', anchor=W)
-        bottom_frame.heading('#1', text='Email', anchor=W)
-        bottom_frame.heading('#2', text='Número', anchor=W)
-        Scrollbar(orient='vertical', command=bottom_frame.yview).place(x=570, y=170, height=250, width=15)
-        Scrollbar(orient='horizontal', command=bottom_frame.xview).place(x=20, y=420, height=15, width=550)
+        self.t_view = Treeview(columns=(0, 0))
+        self.t_view.place(x=20, y=170, width=550, height=250)
+        self.t_view.heading('#0', text='Nome', anchor=W)
+        self.t_view.heading('#1', text='Email', anchor=W)
+        self.t_view.heading('#2', text='Número', anchor=W)
+        Scrollbar(orient='vertical', command=self.t_view.yview).place(x=570, y=170, height=250, width=15)
+        Scrollbar(orient='horizontal', command=self.t_view.xview).place(x=20, y=420, height=15, width=550)
         Label(self.root, background='violet').place(x=570, y=420, height=15, width=15)
         TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
         TButton(self.root, text='Deletar contato').place(x=420, y=465, anchor=CENTER, width=200)
+
+    def view(self):
+        for _ in self.t_view.get_children():
+            self.t_view.delete(_)
+        contacts: list = Database.list()
+        for contact in contacts:
+            self.t_view.insert('', 0, text=contact[0], values=(contact[1], contact[2]))
