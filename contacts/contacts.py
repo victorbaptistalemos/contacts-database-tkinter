@@ -7,8 +7,6 @@ from tkinter.ttk import Scrollbar, Style, Treeview
 
 
 class Contacts:
-    # __database = '.contacts.s3db'
-
     def __init__(self, root: Tk) -> None:
         self.root: Tk = root
         style: Style = Style()
