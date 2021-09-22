@@ -136,10 +136,32 @@ class Contacts:
         Scrollbar(orient='horizontal', command=self.t_view.xview).place(x=20, y=420, height=15, width=550)
         Label(self.root, background='violet').place(x=570, y=420, height=15, width=15)
         TButton(self.root, text='Modificar contato').place(x=175, y=465, anchor=CENTER, width=200)
-        TButton(self.root, text='Deletar contato').place(x=420, y=465, anchor=CENTER, width=200)
+        TButton(self.root, text='Deletar contato', command=self.delete)\
+            .place(x=420, y=465, anchor=CENTER, width=200)
+
+    def delete(self) -> None:
+        """self.bottom_frame() calls self.delete()"""
+        name = self.t_view.item(self.t_view.selection())['text']
+        if name == '':
+            Messages.show_error(
+                'Nenhum contato selecionado!',
+                'Selecione um contato antes de continuar.'
+            )
+        elif Messages.try_action('Confirma ação?', f'Deseja deletar {name} dos contatos?'):
+            if Database.execute(Database.delete(), (name,)):
+                Messages.show_info(
+                    'Contato excluído!',
+                    f'{name} foi removido(a) dos contatos.'
+                )
+                self.view()
+            else:
+                Messages.show_error(
+                    'Algo de errado não está certo!',
+                    'Erro de SQL, verifique!'
+                )
 
     def view(self) -> None:
-        """self.gui() and self.add call self.view()"""
+        """self.gui(), self.add() and self.delete() call self.view()"""
         for _ in self.t_view.get_children():
             self.t_view.delete(_)
         for _ in Database.list():
