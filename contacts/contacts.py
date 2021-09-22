@@ -1,4 +1,5 @@
 from contacts.database import Database
+from contacts.messages import Messages
 from tkinter import CENTER, E, Label, PhotoImage, Tk, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
@@ -9,6 +10,10 @@ from tkinter.ttk import Scrollbar, Style, Treeview
 
 class Contacts:
     def __init__(self, root: Tk) -> None:
+        self.top = None
+        self.t_name = None
+        self.t_email = None
+        self.t_number = None
         self.t_view = None
         self.root: Tk = root
         style: Style = Style()
@@ -44,14 +49,17 @@ class Contacts:
         self.view()
 
     def top_frame(self) -> None:
-        top_frame = TLabelFrame(self.root, text='Criar novo contato', labelanchor='n')
+        top_frame: TLabelFrame = TLabelFrame(self.root, text='Criar novo contato', labelanchor='n')
         top_frame.place(x=20, y=10, width=400, height=150)
         TLabel(top_frame, text='Nome:').place(x=75, y=10, anchor=E)
         TLabel(top_frame, text='Email:').place(x=75, y=35, anchor=E)
         TLabel(top_frame, text='Número:').place(x=75, y=60, anchor=E)
-        TEntry(top_frame).place(x=76, y=10, anchor=W, width=299)
-        TEntry(top_frame).place(x=76, y=35, anchor=W, width=299)
-        TEntry(top_frame).place(x=76, y=60, anchor=W, width=299)
+        self.t_name: TEntry = TEntry(top_frame)
+        self.t_email: TEntry = TEntry(top_frame)
+        self.t_number: TEntry = TEntry(top_frame)
+        self.t_name.place(x=76, y=10, anchor=W, width=299)
+        self.t_email.place(x=76, y=35, anchor=W, width=299)
+        self.t_number.place(x=76, y=60, anchor=W, width=299)
         TButton(top_frame, text='Adicionar contato').place(x=200, y=100, anchor=CENTER, width=200)
 
     @staticmethod
@@ -79,3 +87,34 @@ class Contacts:
         contacts: list = Database.list()
         for contact in contacts:
             self.t_view.insert('', 0, text=contact[0], values=(contact[1], contact[2]))
+
+    def check(self):
+        t_name = self.t_name.get()
+        t_email = self.t_email.get()
+        t_number = self.t_number.get()
+        names: tuple = self.t_view.get_children()
+        names: list = [self.t_view.item(_)['text'] for _ in names]
+        if len(t_name) == 0 and len(t_email) == 0 and len(t_number) < 10:
+            Messages.show_error(
+                'Algo de errado não está certo!',
+                'Algo de errado não está certo!'
+            )
+            return False
+        elif t_name in names:
+            Messages.show_error(
+                'Verifique sua lista de contatos!',
+                f'{t_name} já está na sua lista de contatos.')
+            return False
+        elif '@' not in t_email or '.com' not in t_email:
+            Messages.show_error(
+                'Email inválido!',
+                '@ e .com são necessários para validar o email.'
+            )
+            return False
+        elif len(t_number) < 10:
+            Messages.show_error(
+                'Telefone inválido',
+                'Exemplo de número: 27912345678'
+            )
+        else:
+            return True
