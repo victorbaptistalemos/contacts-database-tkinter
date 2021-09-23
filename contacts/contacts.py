@@ -1,7 +1,6 @@
 from contacts.database import Database
 from contacts.messages import Messages
-from contacts.update import Update
-from tkinter import CENTER, E, END, Label, PhotoImage, Tk, W
+from tkinter import CENTER, E, END, Label, PhotoImage, Tk, Toplevel, W
 from tkinter.ttk import Button as TButton
 from tkinter.ttk import Entry as TEntry
 from tkinter.ttk import Label as TLabel
@@ -11,11 +10,16 @@ from tkinter.ttk import Scrollbar, Style, Treeview
 
 class Contacts:
     def __init__(self, root: Tk) -> None:
-        self.top = None
-        self.t_name = None
-        self.t_email = None
-        self.t_number = None
-        self.t_view = None
+        self.top: None = None
+        self.t_name: None = None
+        self.t_email: None = None
+        self.t_number: None = None
+        self.top_window: None = None
+        self.top_name: None = None
+        self.top_new_number: None = None
+        self.update_new_number: None = None
+        self.t_view: None = None
+        self.new_window: bool = False
         self.root: Tk = root
         self.gui()
 
@@ -25,12 +29,17 @@ class Contacts:
         style: Style = Style()
         style.configure('.', font='TimesNewRoman 12', background='black', foreground='violet')
         style.configure('TButton', font='TimesNewRoman 14 bold')
-        style.configure('TEntry', fieldbackground='violet', foreground='black')
+        style.configure('TEntry', foreground='black')
         style.configure('TLabel', font='TimesNewRoman 14')
         style.configure('TLabelframe.Label', font='TimesNewRoman 14 bold')
         style.configure('TScrollbar', background='violet')
         style.configure('Treeview', fieldbackground='black')
         style.configure('Treeview.Heading', font='TimesNewRoman 12 bold')
+        style.map(
+            'TEntry',
+            fieldbackground=[('disabled', 'violet'), ('!disabled', 'violet')],
+            foreground=[('disabled', 'purple'), ('!disabled', 'black')],
+        )
         style.map(
             'TButton',
             background=[('active', 'purple'), ('!active', 'violet')],
@@ -71,6 +80,7 @@ class Contacts:
         self.t_number.bind('<KP_Enter>', lambda _: self.add())
         TButton(top_frame, text='Adicionar contato', command=self.add)\
             .place(x=200, y=100, anchor=CENTER, width=200)
+        self.t_name.focus()
 
     def add(self) -> None:
         """self.top_frame() calls self.add()"""
@@ -144,17 +154,76 @@ class Contacts:
     def update(self) -> None:
         """self.bottom_frame() calls self.update()"""
         selection: dict = self.t_view.selection()
-        name = self.t_view.item(selection)['text']
+        name: str = self.t_view.item(selection)['text']
         if name == '':
             Messages.show_error(
                 'Nenhum contato selecionado!',
                 'Selecione um contato antes de modificá-lo.'
             )
         else:
-            email = self.t_view.item(selection)['values'][0]
-            number = self.t_view.item(selection)['values'][1]
-            Update((name, email, number))
+            email: str = self.t_view.item(selection)['values'][0]
+            number: str = self.t_view.item(selection)['values'][1]
+            if not self.new_window:
+                self.new_window: bool = True
+                self.top_level((name, email, number))
+            else:
+                Messages.show_error(
+                    'Erro ao abrir nova tela!',
+                    'Você já está editando um contato.'
+                )
+
+    def top_level(self, args: tuple) -> None:
+        """self.update() calls self.top_level()"""
+        self.top_window = Toplevel()
+        self.top_window.title('Atualização de contato:')
+        self.top_window.geometry('400x150+550+200')
+        self.top_window.configure(background='black')
+        TLabel(self.top_window, text='Nome:').place(x=125, y=15, anchor=E)
+        TLabel(self.top_window, text='Email:').place(x=125, y=40, anchor=E)
+        TLabel(self.top_window, text='Número antigo:').place(x=125, y=65, anchor=E)
+        TLabel(self.top_window, text='Número novo:').place(x=125, y=90, anchor=E)
+        self.top_name: TEntry = TEntry(self.top_window)
+        self.top_name.insert(0, args[0])
+        self.top_name.configure(state='disabled')
+        self.top_name.place(x=126, y=5, width=254)
+        top_email: TEntry = TEntry(self.top_window)
+        top_email.insert(0, args[1])
+        top_email.configure(state='disabled')
+        top_email.place(x=126, y=30, width=254)
+        top_old_number: TEntry = TEntry(self.top_window)
+        top_old_number.insert(0, args[2])
+        top_old_number.configure(state='disabled')
+        top_old_number.place(x=126, y=55, width=254)
+        self.top_new_number: TEntry = TEntry(self.top_window)
+        self.top_new_number.place(x=126, y=80, width=254)
+        self.top_new_number.focus()
+        TButton(self.top_window, text='Atualizar', command=self.update_contact)\
+            .place(x=100, y=125, width=150, anchor=CENTER)
+        TButton(self.top_window, text='Cancelar', command=self.cancel_update)\
+            .place(x=300, y=125, width=150, anchor=CENTER)
+
+    def update_contact(self) -> None:
+        """self.top_level() calls self.update_contact()"""
+        if self.check_update():
+            Database.execute(
+                Database.update(),
+                (int(self.top_new_number.get()), self.top_name.get())
+            )
+            Messages.show_info('Sucesso!', 'Contato atualizado!')
+            self.cancel_update()
             self.view()
+        else:
+            Messages.show_error('Algo de errado não está certo!', 'Número inválido!')
+
+    def check_update(self) -> bool:
+        """self.update_contact() calls self.check_update()"""
+        return len(self.top_new_number.get()) >= 10
+
+    def cancel_update(self) -> None:
+        """self.update_contact() calls self.cancel_update()"""
+        self.top_window.destroy()
+        self.new_window: bool = False
+        self.top_window: None = None
 
     def delete(self) -> None:
         """self.bottom_frame() calls self.delete()"""
