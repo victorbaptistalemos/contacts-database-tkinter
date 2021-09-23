@@ -7,7 +7,7 @@ class Database(ABC):
     __database: str = './contacts/.contacts.s3db'
     __ADD: str = 'INSERT INTO contacts VALUES(?, ?,?)'
     __DELETE: str = 'DELETE FROM contacts WHERE name = ?'
-    __UPDATE: str = 'UPDATE contacts SET number=? WHERE number =? AND name =?'
+    __UPDATE: str = 'UPDATE contacts SET number=? WHERE name =?'
 
     @classmethod
     def execute(cls, query: str, parameters: tuple) -> bool:
