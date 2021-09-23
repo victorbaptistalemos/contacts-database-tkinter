@@ -196,6 +196,8 @@ class Contacts:
         top_old_number.place(x=126, y=55, width=254)
         self.top_new_number: TEntry = TEntry(self.top_window)
         self.top_new_number.place(x=126, y=80, width=254)
+        self.top_new_number.bind('<Key-Return>', lambda _: self.update_contact())
+        self.top_new_number.bind('<KP_Enter>', lambda _: self.update_contact())
         self.top_new_number.focus()
         TButton(self.top_window, text='Atualizar', command=self.update_contact)\
             .place(x=100, y=125, width=150, anchor=CENTER)
